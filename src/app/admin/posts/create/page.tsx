@@ -3,7 +3,7 @@ import React from "react";
 
 export default function page() {
   return (
-    <section>
+    <section className="w-full">
       <CreatePostForm />
     </section>
   );

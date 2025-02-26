@@ -61,7 +61,7 @@ const data = {
         {
           title: "Categories",
           icon: Tag,
-          url: "/admin/categories",
+          url: "/admin/category",
         },
         {
           title: "Comments",

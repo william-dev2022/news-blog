@@ -14,6 +14,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export default function RootLayout({
   children,
@@ -23,7 +24,7 @@ export default function RootLayout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="flex flex-col w-full h-full">
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
           <div className="flex items-center w-full  gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
@@ -42,12 +43,14 @@ export default function RootLayout({
               </BreadcrumbList>
             </Breadcrumb>
 
-            <div className="flex items-center gap-2 ml-auto"> 
+            <div className="flex items-center gap-2 ml-auto">
               <ModeToggle />
             </div>
           </div>
         </header>
-        <main className="px-5">{children}</main>
+        <TooltipProvider>
+          <main className="px-5 w-full">{children}</main>
+        </TooltipProvider>
       </SidebarInset>
     </SidebarProvider>
   );

@@ -3,6 +3,16 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import dynamic from "next/dynamic";
+
+const MinimalTiptapEditor = dynamic(
+  () => import("./minimal-tiptap").then((mod) => mod.MinimalTiptapEditor),
+  {
+    ssr: false,
+    loading: () => <p>Loading editor...</p>,
+  }
+);
+
 import {
   Form,
   FormControl,
@@ -17,7 +27,8 @@ import { Textarea } from "./ui/textarea";
 import { MultiSelect } from "./multi-select";
 import { Cat, Dog, Fish, Rabbit, Turtle } from "lucide-react";
 import { Label } from "./ui/label";
-import Tiptap from "./tiptap";
+import { JSONContent } from "@tiptap/core";
+// import { MinimalTiptapEditor } from "./minimal-tiptap";
 
 const frameworksList = [
   { value: "react", label: "React", icon: Turtle },
@@ -26,6 +37,23 @@ const frameworksList = [
   { value: "svelte", label: "Svelte", icon: Rabbit },
   { value: "ember", label: "Ember", icon: Fish },
 ];
+
+const JSONContentSchema: z.ZodType<JSONContent> = z.lazy(() =>
+  z.object({
+    type: z.string().optional(),
+    attrs: z.record(z.any()).optional(),
+    content: z.array(z.lazy(() => JSONContentSchema)).optional(),
+    marks: z
+      .array(
+        z.object({
+          type: z.string(),
+          attrs: z.record(z.any()).optional(),
+        })
+      )
+      .optional(),
+    text: z.string().optional(),
+  })
+);
 
 const formSchema = z.object({
   title: z.string().min(2, {
@@ -37,6 +65,13 @@ const formSchema = z.object({
   category: z.string().array().min(1, {
     message: "category can't be empty.",
   }),
+  tags: z.string().array().nullable(),
+  content: z.union([
+    z.string(), // HTMLContent (string)
+    JSONContentSchema, // Single JSON object
+    z.array(JSONContentSchema), // Array of JSON objects
+    z.null(), // Allow null values
+  ]),
 });
 
 export default function CreatePostForm() {
@@ -45,6 +80,8 @@ export default function CreatePostForm() {
     defaultValues: {
       title: "",
       extract: "",
+      category: ["react"],
+      tags: ["react"]
     },
   });
 
@@ -56,68 +93,95 @@ export default function CreatePostForm() {
   }
 
   return (
-    <section className="max-w-3xl w-full mt-10">
+    <div className="w-full max-w-6xl  mt-10">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <div className="grid md:grid-cols-1 grid-cols-1 gap-4">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="post title" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
+          <div className="w-full  gap-6 flex flex-col-reverse md:flex-row flex-wrap">
+            <div className="w-full md:w-8/12 space-y-3">
+              <Label htmlFor="content">Contents</Label>
+              <MinimalTiptapEditor
+                value={form.getValues("content")}
+                onChange={(value) => {
+                  form.setValue("content", value);
+                }}
+                className="w-full "
+                editorContentClassName="p-5 border "
+                output="html"
+                placeholder="Enter your description..."
+                autofocus={true}
+                editable={true}
+                editorClassName="focus:outline-transparent  focus-within:!border-none focus-visible:!border-none focus:!border-transparent"
+              />
+            </div>
 
-            <FormField
-              control={form.control}
-              name="extract"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Extract</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Type your message here."
-                      {...field}
-                    />
-                    {/* <Input
-                      className="focus-visible:ring-zinc-200 dark:focus-visible:ring-zinc-700"
-                      placeholder="a short passage taken from the post"
-                      {...field}
-                    /> */}
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="flex-1 space-y-6">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="post title" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="extract"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Extract</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Type your message here."
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="space-y-3">
+                <Label htmlFor="category">Post category</Label>
+
+                <MultiSelect
+                  name="category"
+                  options={frameworksList}
+                  onValueChange={(value) => form.setValue("category", value)}
+                  defaultValue={form.getValues("category")}
+                  placeholder="Select category"
+                  variant="secondary"
+                  animation={2}
+                  maxCount={3}
+                />
+              </div>
+
+              <div className="space-y-3">
+                <Label htmlFor="tags">Tags</Label>
+
+                <MultiSelect
+                  name="tags"
+                  options={frameworksList}
+                  onValueChange={(value) => form.setValue("tags", value)}
+                  placeholder="Select tags"
+                  variant="secondary"
+                  animation={2}
+                  maxCount={3}
+                />
+              </div>
+            </div>
           </div>
 
-          <div>
-            <Label htmlFor="category">Post category</Label>
-            <MultiSelect
-              name="category"
-              options={frameworksList}
-              onValueChange={(value) => form.setValue("category", value)}
-              defaultValue={form.getValues("category")}
-              placeholder="Select frameworks"
-              variant="inverted"
-              animation={2}
-              maxCount={3}
-            />
-          </div>
-          <div>
-            <Label htmlFor="category">Post category</Label>
-            <Tiptap />
-          </div>
-
-          <Button type="submit">Submit</Button>
+          <Button className="mt-4" type="submit">
+            Submit
+          </Button>
         </form>
       </Form>
-    </section>
+    </div>
   );
 }
