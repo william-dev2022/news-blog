@@ -122,3 +122,79 @@ body {
   border-radius: 4px;
   min-height: 200px;
 }
+
+/* h1.heading-node{
+  @apply m-0 grow text-3xl font-extrabold
+}
+h2.heading-node{
+  @apply m-0 grow text-xl font-bold
+}
+h3.heading-node{
+  @apply m-0 grow text-lg font-semibold
+}
+h4.heading-node{
+  @apply m-0 grow text-base font-semibold
+}
+h5.heading-node h6.heading-node{
+  @apply m-0 grow text-sm font-normal
+} */
+
+.heading-node {
+    @apply font-bold text-xl mb-4 ;
+  }
+
+  h1.heading-node {
+    @apply text-3xl md:text-4xl mb-6;
+  }
+
+  h2.heading-node {
+    @apply text-2xl md:text-3xl mb-5;
+  }
+
+  h3.heading-node {
+    @apply text-xl md:text-2xl mb-4;
+  }
+
+  .text-node {
+    @apply text-sm leading-7  mb-2;
+  }
+
+  ul.list-node {
+    @apply list-disc list-outside mb-4 ml-5;
+  }
+
+  #post-body ol.list-node {
+    @apply list-decimal ;
+  }
+
+  #post-body ul.list-node li, ol.list-node li {
+    @apply mb-2;
+  }
+
+  #post-body a {
+    @apply text-blue-400 underline hover:text-blue-500;
+  }
+
+  strong {
+    @apply font-bold;
+  }
+
+  em {
+    @apply italic;
+  }
+
+  blockquote {
+    @apply border-l-4 border-purple-600 pl-4 italic text-white mb-4;
+  }
+
+  code {
+    @apply bg-purple-900 text-purple-400 px-1 rounded;
+  }
+
+  pre {
+    @apply bg-black text-white p-4 rounded-md overflow-x-auto mb-4;
+  }
+
+  #post-body hr{
+    @apply my-4 border-t-2 ; 
+  }

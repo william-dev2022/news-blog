@@ -3,9 +3,7 @@
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -13,7 +11,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -23,17 +20,21 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
+import { Input } from "../../../../components/ui/input";
+import { Textarea } from "../../../../components/ui/textarea";
+import { useState } from "react";
+import { createCategory } from "@/actions/category.action";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
-  description: z.string().nullable(),
+  description: z.string().optional(),
 });
 
 export function CreateCategoryModal() {
+  const [isOpen, setIsOpen] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -42,17 +43,25 @@ export function CreateCategoryModal() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
+    const res = await createCategory(values.name, values.description);
     // ✅ This will be type-safe and validated.
-    console.log(values);
+    if (res.success) {
+      form.reset();
+      toast.success("Category created successfully");
+    } else {
+      toast.error(res.message);
+    }
+    setIsOpen(false);
   }
 
   const onOpenChange = (iOpen: boolean) => {
-    console.log(iOpen);
+    setIsOpen(iOpen);
   };
+
   return (
-    <Dialog onOpenChange={onOpenChange} >
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button className="" variant="outline">
           Add Category
@@ -81,15 +90,12 @@ export function CreateCategoryModal() {
             />
             <FormField
               control={form.control}
-              name="name"
+              name="description"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Type your message here."
-                      {...field}
-                    />
+                    <Textarea placeholder="Dscriptions" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
-import { Sora, Poppins } from "next/font/google";
+import {  Poppins } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "sonner";
+// import { Toaster } from "react-hot-toast";
 
-const sora = Sora({
-  variable: "--font-sora",
-  subsets: ["latin"],
-});
+// const sora = Sora({
+//   variable: "--font-sora",
+//   subsets: ["latin"],
+// });
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -26,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${sora.variable} ${poppins.variable} antialiased`}>
+      <body className={`${poppins.variable} antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -34,6 +36,11 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Toaster
+            position="top-right"
+            toastOptions={{ duration: 5000 }}
+            richColors
+          />
         </ThemeProvider>
       </body>
     </html>

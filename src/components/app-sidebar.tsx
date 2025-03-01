@@ -14,6 +14,7 @@ import {
   Users,
   Settings,
   LogOut,
+  Layers,
 } from "lucide-react";
 
 import { NavUser } from "@/components/nav-user";
@@ -25,7 +26,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { SidebarNavMain } from "./main-sidebar-nav";
+import { SidebarNavMain } from "./main-sidebar-nav"; 
 
 // This is sample data.
 const data = {
@@ -60,8 +61,13 @@ const data = {
         },
         {
           title: "Categories",
-          icon: Tag,
+          icon: Layers,
           url: "/admin/category",
+        },
+        {
+          title: "Tags",
+          icon: Tag,
+          url: "/admin/tags",
         },
         {
           title: "Comments",

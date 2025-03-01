@@ -26,32 +26,38 @@ import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { MultiSelect } from "./multi-select";
 import { createPostSchema } from "@/lib/zodSchemas";
-import { createPost } from "@/actions/post.action";
+import { UpdatePost } from "@/actions/post.action";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Switch } from "./ui/switch";
+import { Post, PostCategory, PostTag } from "@prisma/client";
 
 type MultiSelectOptions = {
   value: string;
   label: string;
 };
+type IPost = Post & {
+  tags: PostTag[];
+  categories: PostCategory[];
+};
 interface Props {
   tags: MultiSelectOptions[];
   categories: MultiSelectOptions[];
+  post: IPost;
 }
 
-export default function CreatePostForm({ tags, categories }: Props) {
+export default function UpdatePostForm({ tags, categories, post }: Props) {
   const router = useRouter();
 
   const form = useForm<z.infer<typeof createPostSchema>>({
     resolver: zodResolver(createPostSchema),
     defaultValues: {
-      title: "",
-      extract: "",
-      content: "lorem ipsum",
-      category: [],
-      tags: [],
-      isPublished: false,
+      title: post.title,
+      extract: post.extract,
+      content: post.content,
+      category: post.categories.map((category) => category.categoryId),
+      tags: post.tags.map((tag) => tag.tagId),
+      isPublished: post.published,
     },
   });
 
@@ -59,13 +65,12 @@ export default function CreatePostForm({ tags, categories }: Props) {
   async function onSubmit(values: z.infer<typeof createPostSchema>) {
     // console.log(values);
 
-    const response = await createPost(values);
-    console.log(response);
+    const response = await UpdatePost(post.id, values);
 
     if (response.success) {
       form.reset();
-      router.refresh();
-      toast.success("Post created successfully");
+      toast.success("Post updated successfully");
+      router.push(`/admin/posts/${post.id}`);
     } else {
       toast.error(response.message + " " + (response.errors?.toString() ?? ""));
     }
@@ -152,7 +157,7 @@ export default function CreatePostForm({ tags, categories }: Props) {
                           field.onChange(value);
                           form.setValue("category", value);
                         }}
-                        value={field.value}
+                        defaultValue={field.value}
                         placeholder="Select category"
                         variant="secondary"
                         animation={2}
@@ -173,12 +178,14 @@ export default function CreatePostForm({ tags, categories }: Props) {
                     <FormControl>
                       <MultiSelect
                         name="tags"
+                        value={field.value}
                         options={tags}
                         onValueChange={(value) => {
                           field.onChange(value);
                           form.setValue("tags", value);
                         }}
                         placeholder="Select tags"
+                        defaultValue={field.value}
                         variant="secondary"
                         animation={2}
                         maxCount={3}
@@ -196,9 +203,6 @@ export default function CreatePostForm({ tags, categories }: Props) {
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                     <div className="space-y-0.5">
                       <FormLabel>Publish</FormLabel>
-                      {/* <FormDescription>
-                        Receive emails about new products, features, and more.
-                      </FormDescription> */}
                     </div>
                     <FormControl>
                       <Switch
